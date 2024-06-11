@@ -605,10 +605,11 @@ func (p *TxProcessor) EndTxHook(gasLeft uint64, success bool) {
 		p.PosterFee = big.NewInt(0)
 		computeCost = totalCost
 	}
-
+	log.Debug("p.PosterFee", p.PosterFee)
 	purpose := "feeCollection"
 	if p.state.ArbOSVersion() > 4 {
 		infraFeeAccount, err := p.state.InfraFeeAccount()
+		log.Debug("infraFeeAccount", infraFeeAccount)
 		p.state.Restrict(err)
 		if infraFeeAccount != (common.Address{}) {
 			minBaseFee, err := p.state.L2PricingState().MinBaseFeeWei()
@@ -618,6 +619,7 @@ func (p *TxProcessor) EndTxHook(gasLeft uint64, success bool) {
 			infraComputeCost := arbmath.BigMulByUint(infraFee, computeGas)
 			util.MintBalance(&infraFeeAccount, infraComputeCost, p.evm, scenario, purpose)
 			computeCost = arbmath.BigSub(computeCost, infraComputeCost)
+			log.Debug("minBaseFee",minBaseFee, "infraFee",infraFee, "computeGas",computeGas, "infraComputeCost",infraComputeCost, "computeCost",computeCost)
 		}
 	}
 	if arbmath.BigGreaterThan(computeCost, common.Big0) {
